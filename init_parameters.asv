@@ -1,0 +1,10 @@
+% Defining drone's properties 
+%Physical Constants for
+mass = 0.029; % mass of the drone [kg]
+arm_length = 0.046; % distance from center to arm [m]
+gravity = 9.81;
+
+k_thrust = 3.16e-10; %Thrust coefficient [N/RPM^2]
+k_drag = 7.94e-12; %Drag coefficient [Nm/RPM^2]
+
+
