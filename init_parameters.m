@@ -9,6 +9,8 @@ p.gravity = 9.81;
 
 p.k_thrust = 3.16e-10; %Thrust coefficient [N/RPM^2]
 p.k_drag = 7.94e-12; %Drag coefficient [Nm/RPM^2]
+p.C_drag = 0.01; % Air resistance coefficient
+p.D_pqr = 0.001;
 
 %Moments of Inertia
 p.Ixx = 1.657e-5;       % Roll inertia
@@ -16,10 +18,10 @@ p.Iyy = 1.665e-5;       % Pitch inertia
 p.Izz = 2.926e-5;       % Yaw inertia
 
 % Inertia Matrix (Inertia Tensor)
-p.I = diag([p.Ixx, p.Iyy, p.Izz]);
+I = diag([p.Ixx, p.Iyy, p.Izz]);
 
 %Defining initial values
-x = 0; y = 0; z = 0; u = 0; v = 0; w = 0; phi = 0; theta = 0; psi = 0; p = 0; q = 0; r = 0;
+x = 0; y = 0; z = 0; u = 0; v = 0; w = 0; phi = 0; theta = 0; psi = 0; p_rate = 0; q_rate = 0; r_rate = 0;
 
 % State vector
-X = [x; y; z; u; v; w; phi; theta; psi; p; q; r];
+X = [x; y; z; u; v; w; phi; theta; psi; p_rate; q_rate; r_rate];
