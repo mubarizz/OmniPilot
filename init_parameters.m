@@ -25,3 +25,8 @@ x = 0; y = 0; z = 0; u = 0; v = 0; w = 0; phi = 0; theta = 0; psi = 0; p_rate = 
 
 % State vector
 X = [x; y; z; u; v; w; phi; theta; psi; p_rate; q_rate; r_rate];
+
+% PID Gains (Will be tuned after tests)
+p.Kp_z = 0.11; % Proportional
+p.Ki_z = 0.01; % Integral
+p.Kd_z = 0.06; % Derivative

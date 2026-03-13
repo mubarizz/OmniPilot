@@ -1,5 +1,4 @@
-function dX = drone_dynamics(t, X, t_list,speed_list, p)
-    omega = interp1(t_list, speed_list,t)';
+function X_dot = drone_dynamics(X, omega, p)
     % --- UNPACK STATES ---
     phi = X(7); theta = X(8); psi = X(9);
     
@@ -26,11 +25,11 @@ function dX = drone_dynamics(t, X, t_list,speed_list, p)
     accel = (R * [0; 0; F_total]) / p.mass - [0; 0; p.gravity] + (F_drag/p.mass);
 
     % --- DERIVATIVES (dX) ---
-    dX = zeros(12,1);
-    dX(1:3) = X(4:6);          % Velocity
-    dX(4:6) = accel;           % Acceleration
-    dX(7:9) = X(10:12);        % Angular Velocity
-    dX(10)  = (tau_phi - p.D_pqr*X(10)) / p.Ixx;
-    dX(11)  = (tau_theta- p.D_pqr*X(11)) / p.Iyy;
-    dX(12)  = (tau_psi- p.D_pqr*X(12)) / p.Izz;
+    X_dot = zeros(12,1);
+    X_dot(1:3) = X(4:6);          % Velocity
+    X_dot(4:6) = accel;           % Acceleration
+    X_dot(7:9) = X(10:12);        % Angular Velocity
+    X_dot(10)  = (tau_phi - p.D_pqr*X(10)) / p.Ixx;
+    X_dot(11)  = (tau_theta- p.D_pqr*X(11)) / p.Iyy;
+    X_dot(12)  = (tau_psi- p.D_pqr*X(12)) / p.Izz;
 end
