@@ -11,6 +11,7 @@ p.k_thrust = 3.16e-10; %Thrust coefficient [N/RPM^2]
 p.k_drag = 7.94e-12; %Drag coefficient [Nm/RPM^2]
 p.C_drag = 0.01; % Air resistance coefficient
 p.D_pqr = 0.001;
+p.u_hover = 15500;
 
 %Moments of Inertia
 p.Ixx = 1.657e-5;       % Roll inertia
@@ -27,6 +28,19 @@ x = 0; y = 0; z = 0; u = 0; v = 0; w = 0; phi = 0; theta = 0; psi = 0; p_rate = 
 X = [x; y; z; u; v; w; phi; theta; psi; p_rate; q_rate; r_rate];
 
 % PID Gains (Will be tuned after tests)
-p.Kp_z = 0.11; % Proportional
-p.Ki_z = 0.01; % Integral
-p.Kd_z = 0.06; % Derivative
+p.Kp_z = 40; % Proportional
+p.Ki_z = 0; % Integral
+p.Kd_z = 10; % Derivative
+
+
+p.Kp_phi = 5; % Proportional
+p.Ki_phi = 0; % Integral
+p.Kd_phi = 3; % Derivative
+
+p.Kp_th = 7; % Proportional
+p.Ki_th = 0; % Integral
+p.Kd_th = 3; % Derivative
+
+p.Kp_ps = 5; % Proportional
+p.Ki_ps = 0.01; % Integral
+p.Kd_ps = 1; % Derivative

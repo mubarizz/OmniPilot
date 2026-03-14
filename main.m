@@ -6,8 +6,7 @@ init_parameters;
 % 2. Simulation Setup
 dt = 0.01;                  % 100Hz Control Loop
 time = 0 : dt : 10;         % 10 Seconds
-z_target = 2.0;             % Target: 2 Meters
-
+target = [2;0;10;0];
 % 3. Initialize State Vector (12 states)
 % [x, y, z, vx, vy, vz, phi, theta, psi, p, q, r]
 X = zeros(12,1); 
@@ -15,25 +14,25 @@ X(3) = 0;                   % Start at ground level
 X(8) = deg2rad(10);         % Start with a 10-degree Pitch (theta) for realism
 
 % 4. Initialize PID Memory
-pid_mem.integral = 0;     % Ensure these names match your pid_control.m
-pid_mem.prev_error = 0;
+pid_mem.integral_z = 0;  pid_mem.prev_error_z = 0;
+pid_mem.integral_phi = 0; pid_mem.prev_error_phi = 0;
+pid_mem.integral_th = 0; pid_mem.prev_error_th = 0;
+pid_mem.integral_ps = 0; pid_mem.prev_error_ps = 0;
 
-% 5. Data Logging (Pre-allocation)
-z_history = zeros(length(time), 1);
-theta_history = zeros(length(time), 1); % Let's track pitch too!
+% --- PRE-ALLOCATION (Before the loop) ---
+z_history     = zeros(length(time), 1);
+phi_history   = zeros(length(time), 1);
+theta_history = zeros(length(time), 1);
+psi_history   = zeros(length(time), 1);
 
 %%%%% PID Simulation Loop %%%%%
 for i = 1:length(time)
     % 1. SENSE: Get current altitude 
-    z_current = X(3); 
+    current = [X(3); X(7); X(8); X(9)]; 
     
     % 2. THINK: Run the PID controller
     % This returns the REQUIRED motor speed (omega) to reach target
-    [omega_val, pid_mem] = pid_control(z_target, z_current, dt, pid_mem, p);
-    
-    % 3. ACT: Apply RPM to all 4 motors
-    % (In pure Z-control, all motors spin at the same speed)
-    omega = [omega_val; omega_val; omega_val; omega_val];
+    [omega, pid_mem] = pid_control(target, current, dt, pid_mem, p);
     
     % 4. PHYSICS: Calculate the derivatives using your drone_dynamics.m
     X_dot = drone_dynamics(X, omega, p);
@@ -49,16 +48,35 @@ for i = 1:length(time)
     
     % 6. LOG: Save values for plotting
     z_history(i) = X(3);
+    phi_history(i)   = rad2deg(X(7));
+    theta_history(i) = rad2deg(X(8));
+    psi_history(i)   = rad2deg(X(9));
 end
 
 %%%%% Visualization %%%%%
-figure('Name', 'Crazyflie 2.1 Flight Data');
+figure('Name', 'Crazyflie 2.1 Full PID Performance');
 
-% Plot Altitude
+% --- Altitude Plot ---
+subplot(2,2,1);
 plot(time, z_history, 'b', 'LineWidth', 2);
-hold on;
-yline(z_target, 'r--', 'Setpoint', 'LabelHorizontalAlignment','left');
-grid on;
-ylabel('Altitude (m)');
-title('Altitude PID Control (Z-Axis)');
+hold on; yline(target(1), 'r--'); grid on;
+ylabel('Altitude (m)'); title('Z-Axis');
+
+% --- Roll Plot ---
+subplot(2,2,2);
+plot(time, phi_history, 'm', 'LineWidth', 1.5);
+hold on; yline(target(2), 'r--'); grid on;
+ylabel('Roll (deg)'); title('Phi (\phi)');
+
+% --- Pitch Plot ---
+subplot(2,2,3);
+plot(time, theta_history, 'g', 'LineWidth', 1.5);
+hold on; yline(target(3), 'r--'); grid on;
+ylabel('Pitch (deg)'); title('Theta (\theta)');
+
+% --- Yaw Plot ---
+subplot(2,2,4);
+plot(time, psi_history, 'k', 'LineWidth', 1.5);
+hold on; yline(target(4), 'r--'); grid on;
+ylabel('Yaw (deg)'); title('Psi (\psi)');
 
