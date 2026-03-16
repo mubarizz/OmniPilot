@@ -6,12 +6,12 @@ init_parameters;
 % 2. Simulation Setup
 dt = 0.01;                  % 100Hz Control Loop
 time = 0 : dt : 10;         % 10 Seconds
-target = [2;0;10;0];
+target = [1.5;deg2rad(0);deg2rad(0);deg2rad(10)];
 % 3. Initialize State Vector (12 states)
 % [x, y, z, vx, vy, vz, phi, theta, psi, p, q, r]
 X = zeros(12,1); 
-X(3) = 0;                   % Start at ground level
-X(8) = deg2rad(10);         % Start with a 10-degree Pitch (theta) for realism
+X(7) = deg2rad(0);  % Start with a 10-degree Pitch (theta) for realism
+X(8) = deg2rad(0);
 
 % 4. Initialize PID Memory
 pid_mem.integral_z = 0;  pid_mem.prev_error_z = 0;
@@ -76,7 +76,7 @@ ylabel('Pitch (deg)'); title('Theta (\theta)');
 
 % --- Yaw Plot ---
 subplot(2,2,4);
-plot(time, psi_history, 'k', 'LineWidth', 1.5);
+plot(time, psi_history, 'c', 'LineWidth', 1.5);
 hold on; yline(target(4), 'r--'); grid on;
 ylabel('Yaw (deg)'); title('Psi (\psi)');
 

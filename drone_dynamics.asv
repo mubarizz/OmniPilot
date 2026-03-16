@@ -7,7 +7,7 @@ function X_dot = drone_dynamics(X, omega, p)
     F_total = sum(f);
     l_eff = p.arm_length / sqrt(2);
     
-    tau_phi   = l_eff * (-f(1) + f(2) + f(3) - f(4));
+    tau_phi   = l_eff * (-f(1) + f(2) + f(3)  f(4));
     tau_theta = l_eff * (f(1) + f(2) - f(3) - f(4));
     tau_psi   = p.k_drag * (omega(1)^2 - omega(2)^2 + omega(3)^2 - omega(4)^2);
 

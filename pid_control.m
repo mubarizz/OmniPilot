@@ -3,9 +3,13 @@ function [omega,memory] =  pid_control(target, current, dt, memory,p)
     % Altitude (Z) PID    
 
     error_z = target(1) - current(1); %error calculation
+    
+
     Pz_out = error_z * p.Kp_z; %Proportional term
 
     memory.integral_z = memory.integral_z + (error_z * dt);
+    memory.integral_z = max(min(memory.integral_z, 0.5/p.Ki_z), -0.5/p.Ki_z); % anti-windup
+
     Iz_out = memory.integral_z * p.Ki_z; %Integral term
 
     derivative_z = (error_z - memory.prev_error_z) / dt;
@@ -57,12 +61,13 @@ function [omega,memory] =  pid_control(target, current, dt, memory,p)
     
     % X-Configuration 
     omega = zeros(4,1);
-    omega(1) = u_z - u_phi - u_th + u_ps; %Front-left
-    omega(2) = u_z + u_phi - u_th - u_ps; %Front-right
-    omega(3) = u_z + u_phi + u_th + u_ps; % Rear-Right (Slightly different signs)
-    omega(4) = u_z - u_phi + u_th - u_ps; % Rear-Left
+    RPM_base = sqrt(max(u_z/4, 0) / p.k_thrust);
+    omega(1) = RPM_base - u_phi + u_th + u_ps; %Front-left
+    omega(2) = RPM_base + u_phi + u_th - u_ps; %Front-right
+    omega(3) = RPM_base + u_phi - u_th + u_ps; % Rear-Right (Slightly different signs)
+    omega(4) = RPM_base - u_phi - u_th - u_ps; % Rear-Left
 
-    omega = max(min(omega, 22000), 0);
+    omega = max(min(omega, 18000), 0);
 end
 
     
