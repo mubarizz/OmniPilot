@@ -26,7 +26,12 @@ function X_dot = drone_dynamics(X, omega, p)
 
     % --- DERIVATIVES (dX) ---
     X_dot = zeros(12,1);
-    X_dot(1:3) = X(4:6);          % Velocity
+    world_vel = R * X(4:6);
+
+    X_dot(1) = world_vel(1);
+    X_dot(2) = world_vel(2);
+    X_dot(3) = world_vel(3);
+
     X_dot(4:6) = accel;           % Acceleration
     X_dot(7:9) = X(10:12);        % Angular Velocity
     X_dot(10)  = (tau_phi - p.D_pqr*X(10)) / p.Ixx;

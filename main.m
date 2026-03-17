@@ -5,8 +5,10 @@ init_parameters;
 
 % 2. Simulation Setup
 dt = 0.01;                  % 100Hz Control Loop
-time = 0 : dt : 10;         % 10 Seconds
-target = [1.5;deg2rad(0);deg2rad(0);deg2rad(10)];
+time = 0 : dt : 15;         % 10 Seconds
+target = [1.5;deg2rad(7);deg2rad(5);deg2rad(10)];
+u = udpport("byte", "LocalHost", "127.0.0.1");
+
 % 3. Initialize State Vector (12 states)
 % [x, y, z, vx, vy, vz, phi, theta, psi, p, q, r]
 X = zeros(12,1); 
@@ -47,10 +49,15 @@ for i = 1:length(time)
     end
     
     % 6. LOG: Save values for plotting
+    x_history(i) = X(1);
+    y_history(i) = X(2);
     z_history(i) = X(3);
     phi_history(i)   = rad2deg(X(7));
     theta_history(i) = rad2deg(X(8));
     psi_history(i)   = rad2deg(X(9));
+    % 7. UDP sending
+    data = single([X(1),X(2),X(3),X(7),X(8),X(9)]);
+    write(u, typecast(data,'uint8'), "127.0.0.1", 5005)
 end
 
 %%%%% Visualization %%%%%
@@ -80,3 +87,17 @@ plot(time, psi_history, 'c', 'LineWidth', 1.5);
 hold on; yline(target(4), 'r--'); grid on;
 ylabel('Yaw (deg)'); title('Psi (\psi)');
 
+figure;
+subplot(1,2,1);
+plot(time, x_history, 'r', 'LineWidth', 1.5); grid on;
+xlabel('Time (s)'); ylabel('X (m)'); title('X Position');
+
+subplot(1,2,2);
+plot(time, y_history, 'b', 'LineWidth', 1.5); grid on;
+xlabel('Time (s)'); ylabel('Y (m)'); title('Y Position');
+
+% Top-down 2D path
+figure;
+plot(x_history, y_history, 'w', 'LineWidth', 2); grid on;
+xlabel('X (m)'); ylabel('Y (m)');
+title('XY Trajectory'); axis equal;
