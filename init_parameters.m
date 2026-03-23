@@ -34,13 +34,13 @@ p.Kd_z = 1.8; % Derivative
 
 
 p.Kp_phi = 3000.0; % Proportional
-p.Ki_phi = 0; % Integral
+p.Ki_phi = 50; % Integral
 p.Kd_phi = 100; % Derivative
 
 p.Kp_th = 3000.0; % Proportional
-p.Ki_th = 0; % Integral
+p.Ki_th = 50; % Integral
 p.Kd_th = 100; % Derivative
 
 p.Kp_ps = 4000; % Proportional
-p.Ki_ps = 0; % Integral
+p.Ki_ps = 50; % Integral
 p.Kd_ps = 500; % Derivative
