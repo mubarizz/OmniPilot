@@ -1,3 +1,17 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function [omega,memory] =  pid_control(target, current, dt, memory,p)
 
     % Altitude (Z) PID    
@@ -67,7 +81,7 @@ function [omega,memory] =  pid_control(target, current, dt, memory,p)
     omega(3) = RPM_base + u_phi - u_th + u_ps; % Rear-Right (Slightly different signs)
     omega(4) = RPM_base - u_phi - u_th - u_ps; % Rear-Left
 
-    omega = max(min(omega, 18000), 0);
+    omega = max(min(omega, 1800), 0);
 end
 
     

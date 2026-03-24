@@ -25,7 +25,7 @@ def rotation_matrix(phi, theta, psi):
                    [0, np.sin(phi),  np.cos(phi)]])
     return Rz @ Ry @ Rx
 
-ARM_LEN    = 0.046
+ARM_LEN    = 0.25
 VIEW_RANGE = 0.15
 
 def get_drone_arms(x, y, z, phi, theta, psi):
@@ -71,6 +71,10 @@ class DroneSimApp(QMainWindow):
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.update_plot)
 
+
+        self.slider_kp.valueChanged.connect(self.on_gain_change)
+        self.slider_ki.valueChanged.connect(self.on_gain_change)
+        self.slider_kd.valueChanged.connect(self.on_gain_change)
 
     def setup_plots(self):
         self.fig_main = Figure(facecolor="#0d0d0d")
@@ -225,7 +229,20 @@ class DroneSimApp(QMainWindow):
         except AttributeError as e:
             print(f"DEBUG ERROR: {e}")
             self.status_label.setText("● UI Name Error - Check Terminal")
+    def send_gains(self):
+        kp = self.slider_kp.value() /100
+        ki = self.slider_ki.value() /100
+        kd = self.slider_kd.value() /100
 
+        self.label_kp_val.setText(f"{kp:.2f}")
+        self.label_ki_val.setText(f"{ki:.2f}")
+        self.label_kd_val.setText(f"{kd:.2f}")
+
+        try:
+            gain_data = struct.pack('<3f', kp, ki, kd)
+            self.sock_out.sendto(gain_data, ("127.0.0.1", 5007))
+        except Exception as e:
+            print(f"UDP Error: {e}")
 # ── RUN ───────────────────────────────────────────────────────────────────────
 app = QtWidgets.QApplication(sys.argv)
 window = DroneSimApp()

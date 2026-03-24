@@ -1,8 +1,8 @@
 % Defining drone's properties 
 %Physical Constants for the Crazyflie 2.1 Digital Twin
 
-p.mass = 0.029; % mass of the drone [kg]
-p.arm_length = 0.046; % distance from center to arm [m]
+p.mass = 0.6; % mass of the drone [kg]
+p.arm_length = 0.25; % distance from center to arm [m]
 p.gravity = 9.81;
 
 %Aerodynamics coefficients
@@ -14,9 +14,9 @@ p.D_pqr = 0.001;
 p.u_hover = p.mass * p.gravity;
 
 %Moments of Inertia
-p.Ixx = 1.657e-5;       % Roll inertia
-p.Iyy = 1.665e-5;       % Pitch inertia
-p.Izz = 2.926e-5;       % Yaw inertia
+p.Ixx = 0.005;       % Roll inertia
+p.Iyy = 0.005;       % Pitch inertia
+p.Izz = 0.009;       % Yaw inertia
 
 % Inertia Matrix (Inertia Tensor)
 I = diag([p.Ixx, p.Iyy, p.Izz]);
@@ -28,19 +28,24 @@ x = 0; y = 0; z = 0; u = 0; v = 0; w = 0; phi = 0; theta = 0; psi = 0; p_rate = 
 X = [x; y; z; u; v; w; phi; theta; psi; p_rate; q_rate; r_rate];
 
 % PID Gains (Will be tuned after tests)
-p.Kp_z = 3.0; % Proportional
-p.Ki_z = 1.2; % Integral
-p.Kd_z = 1.8; % Derivative
+p.Kp_z = 10.0; % Proportional
+p.Ki_z = 2; % Integral
+p.Kd_z = 5; % Derivative
 
 
-p.Kp_phi = 3000.0; % Proportional
-p.Ki_phi = 50; % Integral
-p.Kd_phi = 100; % Derivative
+p.Kp_phi = 3.5; % Proportional
+p.Ki_phi = 0.01; % Integral
+p.Kd_phi = 4.5; % Derivative
 
-p.Kp_th = 3000.0; % Proportional
-p.Ki_th = 50; % Integral
-p.Kd_th = 100; % Derivative
+p.Kp_th = 3.5; % Proportional
+p.Ki_th = 0.01; % Integral
+p.Kd_th = 4.5; % Derivative
 
-p.Kp_ps = 4000; % Proportional
-p.Ki_ps = 50; % Integral
-p.Kd_ps = 500; % Derivative
+p.Kp_ps = 2.5; % Proportional
+p.Ki_ps = 0.05; % Integral
+p.Kd_ps = 0.1; % Derivative
+
+
+
+
+hudpr_gains = dsp.UDPReceiver('LocalIPPort', 5007, 'MessageDataType', 'single');
