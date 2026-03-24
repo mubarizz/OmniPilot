@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>2004</width>
+    <height>1083</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow {
+    background-color: #1e1e24; /* Deep Charcoal */
+}
+
+/* Style the Labels (X, Y, Z, YAW) */
+QLabel {
+    color: #00d4ff; /* Cyan */
+    font-weight: bold;
+    font-family: &quot;Consolas&quot;, monospace; /* Makes it look like code/data */
+}
+
+/* Style the Input Boxes */
+QLineEdit {
+    background-color: #121214;
+    color: #ffffff;
+    border: 1px solid #33333a;
+    border-radius: 3px;
+    padding: 2px;
+}
+
+/* Style the Launch &amp; Send Buttons */
+QPushButton {
+    background-color: #2b2b33;
+    color: #00d4ff;
+    border: 2px solid #00d4ff;
+    border-radius: 5px;
+    font-weight: bold;
+    padding: 5px;
+}
+
+QPushButton:hover {
+    background-color: #00d4ff;
+    color: #1e1e24;
+}
+#graph_3d, #graph_closeup {
+    border: 1px solid #444444; /* Use #ffffff for white, or #444444 for a subtle gray */
+    background-color: #000000;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLineEdit" name="input_z">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>160</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="placeholderText">
+     <string>Z (m)</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_sendtarget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>260</y>
+      <width>111</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Send Target</string>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="graph_3d">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>60</y>
+      <width>1071</width>
+      <height>891</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="graph_closeup">
+    <property name="geometry">
+     <rect>
+      <x>1460</x>
+      <y>60</y>
+      <width>421</width>
+      <height>351</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="input_y">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>110</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="placeholderText">
+     <string>Y (m)</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="input_x">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>60</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="placeholderText">
+     <string>X (m)</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="input_psi">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>210</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="placeholderText">
+     <string>Yaw (°)</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_launchsimulation">
+    <property name="geometry">
+     <rect>
+      <x>1700</x>
+      <y>420</y>
+      <width>181</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Launch Simulation</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="status_label">
+    <property name="geometry">
+     <rect>
+      <x>1560</x>
+      <y>540</y>
+      <width>321</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>2004</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
