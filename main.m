@@ -1,11 +1,14 @@
 clear; clc; close all;
-
+clear u u_in hudpr_gains;
+clear functions;
+clearvars;
+delete(findall(0, 'Type', 'udpport'));
 % 1. Load Crazyflie 2.1 Physics
 init_parameters;
 
 % 2. Simulation Setup
 dt = 0.01;                  % 100Hz Control Loop
-time = 0 : dt : 30;         % 15 Seconds
+time = 0 : dt : 15;         % 15 Seconds
 
 % Inner loop target: [z; phi; theta; psi]
 % phi and theta will be computed by outer PID
@@ -37,8 +40,8 @@ outer_mem.integral_y  = 0;  outer_mem.prev_error_y  = 0;
 
 % Outer PID gains — tune these for x/y position control
 % --- Adjusted for Zero Overshoot and Stability ---
-Kp_x = 0.45;   Ki_x = 0.002;  Kd_x = 1.1;  % Lowered Kp, minimized Ki, significantly boosted Kd
-Kp_y = 0.45;   Ki_y = 0.002;  Kd_y = 1.1;  % Lowered Kp, minimized Ki, significantly boosted Kd
+Kp_x = 0;   Ki_x = 0;  Kd_x = 0;  % Lowered Kp, minimized Ki, significantly boosted Kd
+Kp_y = 0;   Ki_y = 0;  Kd_y = 0;  % Lowered Kp, minimized Ki, significantly boosted Kd
 
 % Restrict tilt to prevent the drone from building too much speed
 max_angle = deg2rad(18);

@@ -1,107 +1,108 @@
-function [omega,memory] =  pid_control(target, current, dt, memory,p)
+function [omega, memory] = pid_control(target, current, dt, memory, p)
+    % Persistent variables survive between function calls
     persistent Kp_z Ki_z Kd_z Kp_phi Ki_phi Kd_phi Kp_th Ki_th Kd_th Kp_ps Ki_ps Kd_ps
     persistent hudpr_gains
-    
+
+    % --- INITIALIZATION (Runs only once at the start) ---
     if isempty(Kp_z)
-        % Start by using the values passed in from your 'p' struct
+        % Load Baseline Predictions for a 0.6kg Drone
         Kp_z = p.Kp_z; Ki_z = p.Ki_z; Kd_z = p.Kd_z;
         Kp_phi = p.Kp_phi; Ki_phi = p.Ki_phi; Kd_phi = p.Kd_phi;
         Kp_th = p.Kp_th; Ki_th = p.Ki_th; Kd_th = p.Kd_th;
         Kp_ps = p.Kp_ps; Ki_ps = p.Ki_ps; Kd_ps = p.Kd_ps;
         
-        hudpr_gains = dsp.UDPReceiver('LocalIPPort', 5007, 'MessageDataType', 'single');
-    end
-    
-    % UDP update
-    gain_packet = step(hudpr_gains);
-    if ~isempty(gain_packet)
-        id = gain_packet(1);
-        new_p = gain_packet(2); new_i = gain_packet(3); new_d = gain_packet(4);
-        
-        switch id
-            case 3 % Z
-                Kp_z = new_p; Ki_z = new_i; Kd_z = new_d;
-            case 4 %phi
-                Kp_phi = new_p; Ki_phi = new_i; Kd_phi = new_d;
-            case 5 %theta
-                Kp_th = new_p; Ki_th = new_i; Kd_th = new_d;
-            case 6 %ps
-                Kp_ps = new_p; Ki_ps = new_i; Kd_ps = new_d;
+        % Safely open the UDP port for Sliders
+        try
+            % Clear any ghost objects on this port first
+            old_port = findall(0, 'Type', 'udpport', 'LocalPort', 5007);
+            if ~isempty(old_port), delete(old_port); end
+            
+            hudpr_gains = udpport("byte", "LocalHost", "127.0.0.1", "LocalPort", 5007);
+            fprintf('PID UDP Listener started on Port 5007\n');
+        catch
+            fprintf('Warning: Could not bind Port 5007. Sliders may be inactive.\n');
         end
-        fprintf('Axis %d Updated Live!\n', id);
     end
-
-
-
-
-    % Altitude (Z) PID    
-
-    error_z = target(1) - current(1); %error calculation
     
+    % --- LIVE SLIDER UPDATES ---
+    if ~isempty(hudpr_gains) && hudpr_gains.NumBytesAvailable >= 20
+        % 1. Read the entire buffer to clear any lag
+        raw_bytes = read(hudpr_gains, hudpr_gains.NumBytesAvailable, "uint8");
+        all_floats = typecast(raw_bytes, 'single');
+        
+        % We need at least 4 values after the header to have a full packet
+        found_sync = false;
+        for k = (length(all_floats)-4) : -1 : 1
+            if all_floats(k) == 999.0
+                id    = all_floats(k+1);
+                new_p = all_floats(k+2);
+                new_i = all_floats(k+3);
+                new_d = all_floats(k+4);
+                found_sync = true;
+                break; 
+            end
+        end
 
-    Pz_out = error_z * Kp_z; %Proportional term
-
-    memory.integral_z = memory.integral_z + (error_z * dt);
-    memory.integral_z = max(min(memory.integral_z, 0.5/(Ki_z+ 1e-6)), -0.5/(Ki_z+ 1e-6)); % anti-windup
-
-    Iz_out = memory.integral_z * Ki_z; %Integral term
-
-    derivative_z = (error_z - memory.prev_error_z) / dt;
-    Dz_out = derivative_z * Kd_z; %Derivative term
-
-    u_z = Pz_out + Iz_out + Dz_out + p.u_hover;
-    memory.prev_error_z = error_z;
-
-
-    %Roll (phi)
-    error_phi = target(2) - current(2); %error calculation
-    Pphi_out = error_phi * Kp_phi; %Proportional term
-
-    memory.integral_phi = memory.integral_phi + (error_phi * dt);
-    Iphi_out = memory.integral_phi * Ki_phi; %Integral term
-
-    derivative_phi = (error_phi - memory.prev_error_phi) / dt;
-    Dphi_out = derivative_phi * Kd_phi; %Derivative term
-
-    u_phi = Pphi_out + Iphi_out + Dphi_out;
-    memory.prev_error_phi = error_phi;
-
-
-    % Pitch (Theta)
-    error_th = target(3) - current(3); %error calculation
-    Pth_out = error_th * Kp_th; %Proportional term
-
-    memory.integral_th = memory.integral_th + (error_th * dt);
-    Ith_out = memory.integral_th * Ki_th; %Integral term
-
-    derivative_th = (error_th - memory.prev_error_th) / dt;
-    Dth_out = derivative_th * Kd_th; %Derivative term
-
-    u_th = Pth_out + Ith_out + Dth_out;
-    memory.prev_error_th = error_th;
-
-    % Yaw (psi)
-    error_ps = target(4) - current(4); %error calculation
-    Pps_out = error_ps * Kp_ps; %Proportional term
-
-    memory.integral_ps = memory.integral_ps + (error_ps * dt);
-    Ips_out = memory.integral_ps * Ki_ps; %Integral term
-
-    derivative_ps = (error_ps - memory.prev_error_ps) / dt;
-    Dps_out = derivative_ps * Kd_ps; %Derivative term
-
-    u_ps = Pps_out + Ips_out + Dps_out;
-    memory.prev_error_ps = error_ps;
+        % 3. Apply the gains if sync was successful
+        if found_sync && any(id == [3, 4, 5, 6])
+            switch id
+                case 3, Kp_z = new_p; Ki_z = new_i; Kd_z = new_d;
+                case 4, Kp_phi = new_p; Ki_phi = new_i; Kd_phi = new_d;
+                case 5, Kp_th = new_p; Ki_th = new_i; Kd_th = new_d;
+                case 6, Kp_ps = new_p; Ki_ps = new_i; Kd_ps = new_d;
+            end
+            fprintf('LATEST GAINS SYNCED: Axis %.0f | P:%.2f I:%.2f D:%.2f\n', id, new_p, new_i, new_d);
+        end
+    end
+    % --- PID CALCULATIONS ---
     
-    % X-Configuration 
-    omega = zeros(4,1);
-    RPM_base = sqrt(max(u_z/4, 0) / p.k_thrust);
-    omega(1) = RPM_base - u_phi + u_th + u_ps; %Front-left
-    omega(2) = RPM_base + u_phi + u_th - u_ps; %Front-right
-    omega(3) = RPM_base + u_phi - u_th + u_ps; % Rear-Right (Slightly different signs)
-    omega(4) = RPM_base - u_phi - u_th - u_ps; % Rear-Left
+    % 1. Altitude (Z) - Includes Feed-Forward Hover Thrust
+    err_z = target(1) - current(1);
+    memory.integral_z = memory.integral_z + (err_z * dt);
+    % Anti-windup: limit integral to 20% of total thrust
+    memory.integral_z = max(min(memory.integral_z, 2), -2); 
+    
+    der_z = (err_z - memory.prev_error_z) / dt;
+    u_z = (err_z * Kp_z) + (memory.integral_z * Ki_z) + (der_z * Kd_z) + p.u_hover;
+    memory.prev_error_z = err_z;
 
-    omega = max(min(omega, 100000), 0);
+    % 2. Roll (Phi)
+    err_phi = target(2) - current(2);
+    memory.integral_phi = memory.integral_phi + (err_phi * dt);
+    der_phi = (err_phi - memory.prev_error_phi) / dt;
+    u_phi = (err_phi * Kp_phi) + (memory.integral_phi * Ki_phi) + (der_phi * Kd_phi);
+    memory.prev_error_phi = err_phi;
+
+    % 3. Pitch (Theta)
+    err_th = target(3) - current(3);
+    memory.integral_th = memory.integral_th + (err_th * dt);
+    der_th = (err_th - memory.prev_error_th) / dt;
+    u_th = (err_th * Kp_th) + (memory.integral_th * Ki_th) + (der_th * Kd_th);
+    memory.prev_error_th = err_th;
+
+    % 4. Yaw (Psi)
+    err_ps = target(4) - current(4);
+    memory.integral_ps = memory.integral_ps + (err_ps * dt);
+    der_ps = (err_ps - memory.prev_error_ps) / dt;
+    u_ps = (err_ps * Kp_ps) + (memory.integral_ps * Ki_ps) + (der_ps * Kd_ps);
+    memory.prev_error_ps = err_ps;
+
+    % --- MOTOR MIXING (X-Configuration) ---
+    F_total = max(u_z, 0);
+    L = p.arm_length / sqrt(2);
+    k_t = p.k_thrust;
+    k_d = p.k_drag;
+
+    % Forces required per motor
+    f1 = (F_total/4) - (u_phi/(4*L)) + (u_th/(4*L)) + (u_ps/(4*(k_d/k_t)));
+    f2 = (F_total/4) + (u_phi/(4*L)) + (u_th/(4*L)) - (u_ps/(4*(k_d/k_t)));
+    f3 = (F_total/4) + (u_phi/(4*L)) - (u_th/(4*L)) + (u_ps/(4*(k_d/k_t)));
+    f4 = (F_total/4) - (u_phi/(4*L)) - (u_th/(4*L)) - (u_ps/(4*(k_d/k_t)));
+
+    % Conversion to Motor Speeds (RPM/RadS)
+    f_motor = max([f1; f2; f3; f4], 0); 
+    omega = sqrt(f_motor / k_t);
+    
+    % Crazyflie 2.1 physical limit (~22,000 RPM converted to match your constants)
+    omega = min(omega, 19200); 
 end
-
-    

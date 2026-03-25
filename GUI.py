@@ -47,6 +47,7 @@ class DroneSimApp(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi("designer.ui", self)
+        self.matlab_process = None
 
         self.xs = deque()
         self.ys = deque()
@@ -75,6 +76,9 @@ class DroneSimApp(QMainWindow):
         self.slider_kp.valueChanged.connect(self.send_gains)
         self.slider_ki.valueChanged.connect(self.send_gains)
         self.slider_kd.valueChanged.connect(self.send_gains)
+
+        self.btn_retest.clicked.connect(self.reset_simulation)
+
 
     def setup_plots(self):
         self.fig_main = Figure(facecolor="#0d0d0d")
@@ -119,10 +123,13 @@ class DroneSimApp(QMainWindow):
 
 
     def on_simulate(self):
-        if self.running:
-            return
+        proc = getattr(self, 'matlab_process', None)
+        if proc is not None:
+            if proc.poll() is None:
+                proc.kill()
+                proc.wait()
 
-        subprocess.Popen([
+        self.matlab_process = subprocess.Popen([
             r"C:\Program Files\MATLAB\R2025b\bin\matlab.exe",
             "-batch", "main"
         ])
@@ -230,20 +237,70 @@ class DroneSimApp(QMainWindow):
             print(f"DEBUG ERROR: {e}")
             self.status_label.setText("● UI Name Error - Check Terminal")
     def send_gains(self):
-        axis_id = float(self.combo_axis.currentIndex() + 1)
-        kp = self.slider_kp.value() /100
-        ki = self.slider_ki.value() /100
-        kd = self.slider_kd.value() /100
-
-        self.label_kp_val.setText(f"{kp:.2f}")
-        self.label_ki_val.setText(f"{ki:.2f}")
-        self.label_kd_val.setText(f"{kd:.2f}")
-
+        if not self.running:
+            return
         try:
-            gain_data = struct.pack('<4f', axis_id, kp, ki, kd)
+
+            axis_id = float(self.combo_axis.currentText())
+            kp = float(self.slider_kp.value() /100)
+            ki = float(self.slider_ki.value() /100)
+            kd = float(self.slider_kd.value() /100)
+
+            self.label_kp_val.setText(f"{kp:.2f}")
+            self.label_ki_val.setText(f"{ki:.2f}")
+            self.label_kd_val.setText(f"{kd:.2f}")
+
+            header = 999.0
+            gain_data = struct.pack('<5f',header, axis_id, kp, ki, kd)
             self.sock_out.sendto(gain_data, ("127.0.0.1", 5007))
         except Exception as e:
             print(f"UDP Error: {e}")
+
+    def reset_simulation(self):
+        # 1. STOP THE BACKGROUND PROCESS
+        # We check if the attribute exists AND if it isn't None
+        if hasattr(self, 'matlab_process') and self.matlab_process is not None:
+            try:
+                # Check if process is still actually running
+                if self.matlab_process.poll() is None:
+                    self.matlab_process.kill()
+                    self.matlab_process.wait(timeout=2)  # Wait up to 2s for it to die
+            except Exception as e:
+                print(f"Process termination error: {e}")
+            finally:
+                # Crucial: Reset to None so the next check passes safely
+                self.matlab_process = None
+
+        # 2. STOP THE GUI UPDATES
+        self.timer.stop()
+        self.running = False
+
+        # 3. CLEAR DATA BUFFERS
+        self.xs.clear()
+        self.ys.clear()
+        self.zs.clear()
+        self.state = {"x": 0.0, "y": 0.0, "z": 0.0, "phi": 0.0, "theta": 0.0, "psi": 0.0}
+
+        # 4. CLEAR THE VISUALS
+        self.trail.set_data_3d([], [], [])
+        self.arm_x.set_data_3d([], [], [])
+        self.arm_y.set_data_3d([], [], [])
+        self.center.set_data_3d([], [], [])
+
+        # Also clear the close-up view
+        self.cl_arm_x.set_data_3d([], [], [])
+        self.cl_arm_y.set_data_3d([], [], [])
+        self.cl_center.set_data_3d([], [], [])
+
+        self.canvas_main.draw()
+        self.canvas_close.draw()
+
+        # 5. UI FEEDBACK
+        self.btn_launchsimulation.setText("Launch Simulation")
+        self.btn_launchsimulation.setEnabled(True)
+        self.btn_launchsimulation.setStyleSheet("")  # Reset to original style
+        self.status_label.setText("● System Reset: Ready to launch.")
+        self.status_label.setStyleSheet("color: #ffaa00;")
 # ── RUN ───────────────────────────────────────────────────────────────────────
 app = QtWidgets.QApplication(sys.argv)
 window = DroneSimApp()
