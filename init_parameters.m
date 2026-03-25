@@ -7,10 +7,10 @@ p.gravity = 9.81;
 
 %Aerodynamics coefficients
 
-p.k_thrust = 3.16e-10; %Thrust coefficient [N/RPM^2]
-p.k_drag = 7.94e-12; %Drag coefficient [Nm/RPM^2]
+p.k_thrust = 1.22e-8; %Thrust coefficient [N/RPM^2]
+p.k_drag = 1.83e-10; %Drag coefficient [Nm/RPM^2]
 p.C_drag = 0.01; % Air resistance coefficient
-p.D_pqr = 0.001;
+p.D_pqr = 0.002;
 p.u_hover = p.mass * p.gravity;
 
 %Moments of Inertia
@@ -48,4 +48,3 @@ p.Kd_ps = 0.1; % Derivative
 
 
 
-hudpr_gains = dsp.UDPReceiver('LocalIPPort', 5007, 'MessageDataType', 'single');

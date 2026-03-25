@@ -72,9 +72,9 @@ class DroneSimApp(QMainWindow):
         self.timer.timeout.connect(self.update_plot)
 
 
-        self.slider_kp.valueChanged.connect(self.on_gain_change)
-        self.slider_ki.valueChanged.connect(self.on_gain_change)
-        self.slider_kd.valueChanged.connect(self.on_gain_change)
+        self.slider_kp.valueChanged.connect(self.send_gains)
+        self.slider_ki.valueChanged.connect(self.send_gains)
+        self.slider_kd.valueChanged.connect(self.send_gains)
 
     def setup_plots(self):
         self.fig_main = Figure(facecolor="#0d0d0d")
@@ -230,6 +230,7 @@ class DroneSimApp(QMainWindow):
             print(f"DEBUG ERROR: {e}")
             self.status_label.setText("● UI Name Error - Check Terminal")
     def send_gains(self):
+        axis_id = float(self.combo_axis.currentIndex() + 1)
         kp = self.slider_kp.value() /100
         ki = self.slider_ki.value() /100
         kd = self.slider_kd.value() /100
@@ -239,7 +240,7 @@ class DroneSimApp(QMainWindow):
         self.label_kd_val.setText(f"{kd:.2f}")
 
         try:
-            gain_data = struct.pack('<3f', kp, ki, kd)
+            gain_data = struct.pack('<4f', axis_id, kp, ki, kd)
             self.sock_out.sendto(gain_data, ("127.0.0.1", 5007))
         except Exception as e:
             print(f"UDP Error: {e}")
