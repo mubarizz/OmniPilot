@@ -73,11 +73,9 @@ class DroneSimApp(QMainWindow):
         self.timer.timeout.connect(self.update_plot)
 
 
-        self.slider_kp.valueChanged.connect(self.send_gains)
-        self.slider_ki.valueChanged.connect(self.send_gains)
-        self.slider_kd.valueChanged.connect(self.send_gains)
-
-        self.btn_retest.clicked.connect(self.reset_simulation)
+        #self.slider_ki.valueChanged.connect(self.send_gains)
+        #.slider_kd.valueChanged.connect(self.send_gains)
+        #self.btn_retest.clicked.connect(self.reset_simulation)
 
 
     def setup_plots(self):
