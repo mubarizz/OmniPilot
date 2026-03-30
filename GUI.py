@@ -25,8 +25,8 @@ def rotation_matrix(phi, theta, psi):
                    [0, np.sin(phi),  np.cos(phi)]])
     return Rz @ Ry @ Rx
 
-ARM_LEN    = 0.25
-VIEW_RANGE = 0.15
+ARM_LEN    = 0.046
+VIEW_RANGE = 0.1
 
 def get_drone_arms(x, y, z, phi, theta, psi):
     R = rotation_matrix(phi, theta, psi)
