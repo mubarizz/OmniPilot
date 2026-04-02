@@ -48,7 +48,7 @@ class DroneSimApp(QMainWindow):
         super().__init__()
         uic.loadUi("designer.ui", self)
         self.matlab_process = None
-
+        self.controller_process = None
         self.xs = deque()
         self.ys = deque()
         self.zs = deque()
@@ -65,8 +65,10 @@ class DroneSimApp(QMainWindow):
         self.sock_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         self.setup_plots()
+
         self.btn_launchsimulation.clicked.connect(self.on_simulate)
         self.btn_sendtarget.clicked.connect(self.send_target)
+        self.btn_switch_manual.clicked.connect(self.toggle_manual_mode)
 
         self.timer = QTimer()
         self.timer.setInterval(50)
@@ -299,6 +301,34 @@ class DroneSimApp(QMainWindow):
         self.btn_launchsimulation.setStyleSheet("")  # Reset to original style
         self.status_label.setText("● System Reset: Ready to launch.")
         self.status_label.setStyleSheet("color: #ffaa00;")
+
+    def toggle_manual_mode(self):
+        # Check if the process exists and is currently running
+        is_running = self.controller_process is not None and self.controller_process.poll() is None
+
+        if not is_running:
+            # ─── TURN ON MANUAL MODE ───
+            self.controller_process = subprocess.Popen([sys.executable, "controller.py"])
+
+            # Update the UI to show it is active
+            self.btn_switch_manual.setText("🕹️ Manual Mode: ON")
+            self.btn_switch_manual.setStyleSheet("""
+                background-color: #ff9900; 
+                color: #000000; 
+                font-weight: bold;
+            """)
+            self.status_label.setText("● Joystick Control Active")
+
+        else:
+            # ─── TURN OFF MANUAL MODE ───
+            self.controller_process.kill()
+            self.controller_process.wait(timeout=2)
+            self.controller_process = None
+            self.send_target()
+            # Reset the UI to default
+            self.btn_switch_manual.setText("Switch to Manual Mode")
+            self.btn_switch_manual.setStyleSheet("")
+            self.status_label.setText("● Switched to Autonomous Mode")
 # ── RUN ───────────────────────────────────────────────────────────────────────
 app = QtWidgets.QApplication(sys.argv)
 window = DroneSimApp()

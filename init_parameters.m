@@ -29,7 +29,7 @@ X = [x; y; z; u; v; w; phi; theta; psi; p_rate; q_rate; r_rate];
 
 % PID Gains (Will be tuned after tests)
 p.Kp_z = 0.8; 
-p.Ki_z = 0.4; 
+p.Ki_z = 0.05; 
 p.Kd_z = 0.7;
 
 

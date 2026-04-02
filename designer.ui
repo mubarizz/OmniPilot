@@ -355,6 +355,19 @@ QPushButton:hover {
      <string>Retest</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btn_switch_manual">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>570</y>
+      <width>141</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Switch to Manual</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menuBar">

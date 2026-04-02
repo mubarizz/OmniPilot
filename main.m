@@ -8,7 +8,7 @@ init_parameters;
 
 % 2. Simulation Setup
 dt = 0.01;                  % 100Hz Control Loop
-time = 0 : dt : 15;         % 15 Seconds
+time = 0 : dt : 60;         % 60 Seconds
 
 % Inner loop target: [z; phi; theta; psi]
 % phi and theta will be computed by outer PID
@@ -40,8 +40,8 @@ outer_mem.integral_y  = 0;  outer_mem.prev_error_y  = 0;
 
 % Outer PID gains — tune these for x/y position control
 % --- Adjusted for Zero Overshoot and Stability ---
-Kp_x = 0.08;   Ki_x = 0;  Kd_x = 0.25;  
-Kp_y = 0.08;   Ki_y = 0;  Kd_y = 0.25;  
+Kp_x = 0.15;   Ki_x = 0;  Kd_x = 0.25;  
+Kp_y = 0.15;   Ki_y = 0;  Kd_y = 0.25;  
 
 % Restrict tilt to prevent the drone from building too much speed
 max_angle = deg2rad(18);
